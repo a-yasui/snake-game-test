@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <title>Snake Game</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-center font-sans">
   <h1>Snake Game</h1>
-  <canvas id="game" width="700" height="700"></canvas>
+  <canvas
+    id="game"
+    width="700"
+    height="700"
+    class="bg-black block mx-auto"
+  ></canvas>
   <div id="score">Score: 0</div>
-  <button id="restart">Restart</button>
-  <div id="controls">
-    <div class="row">
-      <button id="up" aria-label="up">↑</button>
+  <button id="restart" class="hidden mt-2 py-2 px-5 text-xl">Restart</button>
+  <div id="controls" class="mt-5 inline-block">
+    <div class="row flex justify-center">
+      <button id="up" aria-label="up" class="w-20 h-20 text-4xl m-[5px]">↑</button>
     </div>
-    <div class="row">
-      <button id="left" aria-label="left">←</button>
-      <button id="down" aria-label="down">↓</button>
-      <button id="right" aria-label="right">→</button>
+    <div class="row flex justify-center">
+      <button id="left" aria-label="left" class="w-20 h-20 text-4xl m-[5px]">←</button>
+      <button id="down" aria-label="down" class="w-20 h-20 text-4xl m-[5px]">↓</button>
+      <button id="right" aria-label="right" class="w-20 h-20 text-4xl m-[5px]">→</button>
     </div>
   </div>
   <script src="script.js"></script>
