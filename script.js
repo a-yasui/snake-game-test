@@ -10,6 +10,7 @@ const initialFoodCount = 5;
 const foodSpawnThreshold = 3;
 const maxFoodCount = 8;
 const foodSpawnTime = 3000; // ms between new food spawns
+const blinkInterval = 100; // ms between snake color changes when flashing
 
 let snake = [];
 let direction = { x: 0, y: 0 };
@@ -37,7 +38,7 @@ function highlightButton(id) {
   setTimeout(() => btn.classList.remove('bg-blue-500', 'text-white'), 200);
 }
 
-function startFlash(interval = 50) {
+function startFlash(interval = blinkInterval) {
   if (flashInterval) return;
   snakeColor = 'red';
   draw();
@@ -183,7 +184,7 @@ function gameLoop() {
 
   if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
     stuckTime += moveTime;
-    startFlash(100);
+    startFlash();
     if (stuckTime >= stuckLimit) {
       gameOver();
     }
@@ -222,6 +223,25 @@ function draw() {
   snake.forEach(seg => {
     ctx.fillRect(seg.x * tileSize, seg.y * tileSize, tileSize, tileSize);
   });
+
+  const head = snake[0];
+  const arrow =
+    direction.x === 1
+      ? '▶'
+      : direction.x === -1
+      ? '◀'
+      : direction.y === 1
+      ? '▼'
+      : '▲';
+  ctx.fillStyle = 'white';
+  ctx.font = `${tileSize}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(
+    arrow,
+    head.x * tileSize + tileSize / 2,
+    head.y * tileSize + tileSize / 2
+  );
 }
 
 function gameOver() {
