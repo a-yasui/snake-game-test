@@ -9,3 +9,8 @@ canvas {
   display: block;
   margin: 0 auto;
 }
+
+#restart {
+  display: none;
+  margin-top: 10px;
+}
