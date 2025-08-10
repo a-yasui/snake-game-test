@@ -5,8 +5,8 @@ const restartBtn = document.getElementById('restart');
 const tileCount = 35;
 const tileSize = canvas.width / tileCount;
 const baseMoveTime = 200; // ms per move
-const level10MoveTime = 150; // ms per move when length >= 10
-const level20MoveTime = 100; // ms per move when length >= 20
+const speedStep = 50; // ms faster for each 10 length
+const minMoveTime = 50; // ms minimum speed
 const speedUpMultiplier = 10;
 const speedUpDuration = 5000; // ms speed boost duration
 const speedItemSpawnTime = 10000; // ms between speed item spawns
@@ -115,9 +115,8 @@ function stopSpeedItemSpawner() {
 }
 
 function getBaseMoveTime() {
-  if (snake.length >= 20) return level20MoveTime;
-  if (snake.length >= 10) return level10MoveTime;
-  return baseMoveTime;
+  const reduction = Math.floor(snake.length / 10) * speedStep;
+  return Math.max(baseMoveTime - reduction, minMoveTime);
 }
 
 function updateSpeed() {

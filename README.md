@@ -6,7 +6,7 @@ Use arrow keys or the on-screen buttons to steer the snake and collect food.
 
 ## Gameplay
 
-- Board is 35x35 tiles and the snake moves every 0.2 seconds. Speed increases to 0.15 seconds per move when the snake reaches length 10 and to 0.10 seconds per move at length 20.
+- Board is 35x35 tiles. The snake moves every 0.2 seconds and gains speed by 0.05 seconds for each 10 tiles of length (0.15s at length 10, 0.10s at length 20, down to a minimum of 0.05s).
 - Game starts with five food items on the board.
 - When only three items remain, new food spawns every few seconds until there are eight.
 - Each food is worth 10 points and grows the snake by one tile.
