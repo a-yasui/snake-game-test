@@ -6,14 +6,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-center font-sans">
-  <h1>Snake Game</h1>
+  <div class="flex items-center p-4 text-left">
+    <h1 class="text-4xl font-bold">Snake Game</h1>
+    <div id="score" class="ml-4 text-4xl font-bold">Score: 0</div>
+  </div>
   <canvas
     id="game"
     width="700"
     height="700"
     class="bg-black block mx-auto"
   ></canvas>
-  <div id="score">Score: 0</div>
   <button id="restart" class="hidden mx-auto mt-2 py-2 px-5 text-xl border-2 border-gray-700">Restart</button>
   <div id="controls" class="mt-5 inline-block">
     <div class="row flex justify-center">

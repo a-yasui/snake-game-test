@@ -15,6 +15,23 @@ let score = 0;
 let moveInterval;
 let stuckTime = 0;
 
+function updateScoreDisplay() {
+  const scoreEl = document.getElementById('score');
+  scoreEl.innerHTML =
+    '<span class="text-red-600 font-extrabold">+~~ !! </span>' +
+    score +
+    ' Score';
+  setTimeout(() => {
+    scoreEl.textContent = 'Score: ' + score;
+  }, 800);
+}
+
+function highlightButton(id) {
+  const btn = document.getElementById(id);
+  btn.classList.add('bg-blue-500', 'text-white');
+  setTimeout(() => btn.classList.remove('bg-blue-500', 'text-white'), 200);
+}
+
 function initGame() {
   restartBtn.style.display = 'none';
   score = 0;
@@ -56,23 +73,24 @@ function placeFood() {
 }
 
 function setNextDirection(x, y) {
-  if (direction.x === -x || direction.y === -y) return;
+  if (direction.x === -x || direction.y === -y) return false;
   nextDirection = { x, y };
+  return true;
 }
 
 document.addEventListener('keydown', e => {
   switch (e.key) {
     case 'ArrowUp':
-      setNextDirection(0, -1);
+      if (setNextDirection(0, -1)) highlightButton('up');
       break;
     case 'ArrowDown':
-      setNextDirection(0, 1);
+      if (setNextDirection(0, 1)) highlightButton('down');
       break;
     case 'ArrowLeft':
-      setNextDirection(-1, 0);
+      if (setNextDirection(-1, 0)) highlightButton('left');
       break;
     case 'ArrowRight':
-      setNextDirection(1, 0);
+      if (setNextDirection(1, 0)) highlightButton('right');
       break;
   }
 });
@@ -81,7 +99,7 @@ function addControl(id, x, y) {
   const btn = document.getElementById(id);
   const handler = e => {
     e.preventDefault();
-    setNextDirection(x, y);
+    if (setNextDirection(x, y)) highlightButton(id);
   };
   btn.addEventListener('touchstart', handler);
   btn.addEventListener('click', handler);
@@ -119,7 +137,7 @@ function gameLoop() {
 
   if (head.x === food.x && head.y === food.y) {
     score += 10;
-    document.getElementById('score').innerText = 'Score: ' + score;
+    updateScoreDisplay();
     placeFood();
   } else {
     snake.pop();
