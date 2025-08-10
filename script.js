@@ -55,24 +55,43 @@ function placeFood() {
   food = newFood;
 }
 
+function setNextDirection(x, y) {
+  if (direction.x === -x || direction.y === -y) return;
+  nextDirection = { x, y };
+}
+
 document.addEventListener('keydown', e => {
   switch (e.key) {
     case 'ArrowUp':
-      if (direction.y !== 1) nextDirection = { x: 0, y: -1 };
+      setNextDirection(0, -1);
       break;
     case 'ArrowDown':
-      if (direction.y !== -1) nextDirection = { x: 0, y: 1 };
+      setNextDirection(0, 1);
       break;
     case 'ArrowLeft':
-      if (direction.x !== 1) nextDirection = { x: -1, y: 0 };
+      setNextDirection(-1, 0);
       break;
     case 'ArrowRight':
-      if (direction.x !== -1) nextDirection = { x: 1, y: 0 };
+      setNextDirection(1, 0);
       break;
   }
 });
 
+function addControl(id, x, y) {
+  const btn = document.getElementById(id);
+  const handler = e => {
+    e.preventDefault();
+    setNextDirection(x, y);
+  };
+  btn.addEventListener('touchstart', handler);
+  btn.addEventListener('click', handler);
+}
+
 restartBtn.addEventListener('click', initGame);
+addControl('up', 0, -1);
+addControl('down', 0, 1);
+addControl('left', -1, 0);
+addControl('right', 1, 0);
 
 function gameLoop() {
   direction = nextDirection;
