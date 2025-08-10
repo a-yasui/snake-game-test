@@ -19,7 +19,7 @@ let score = 0;
 let moveInterval;
 let stuckTime = 0;
 let snakeColor = 'lime';
-let wallFlashInterval = null;
+let flashInterval = null;
 let foodSpawnInterval = null;
 
 function updateScoreDisplay(points) {
@@ -37,20 +37,20 @@ function highlightButton(id) {
   setTimeout(() => btn.classList.remove('bg-blue-500', 'text-white'), 200);
 }
 
-function startWallFlash() {
-  if (wallFlashInterval) return;
+function startFlash(interval = 50) {
+  if (flashInterval) return;
   snakeColor = 'red';
   draw();
-  wallFlashInterval = setInterval(() => {
+  flashInterval = setInterval(() => {
     snakeColor = snakeColor === 'lime' ? 'red' : 'lime';
     draw();
-  }, 50);
+  }, interval);
 }
 
-function stopWallFlash() {
-  if (!wallFlashInterval) return;
-  clearInterval(wallFlashInterval);
-  wallFlashInterval = null;
+function stopFlash() {
+  if (!flashInterval) return;
+  clearInterval(flashInterval);
+  flashInterval = null;
   snakeColor = 'lime';
 }
 
@@ -75,7 +75,7 @@ function stopFoodSpawner() {
 
 function initGame() {
   restartBtn.style.display = 'none';
-  stopWallFlash();
+  stopFlash();
   stopFoodSpawner();
   score = 0;
   document.getElementById('score').innerText = 'Score: ' + score;
@@ -174,7 +174,7 @@ function gameLoop() {
     head.y >= tileCount
   ) {
     stuckTime += moveTime;
-    startWallFlash();
+    startFlash();
     if (stuckTime >= stuckLimit) {
       gameOver();
     }
@@ -183,13 +183,14 @@ function gameLoop() {
 
   if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
     stuckTime += moveTime;
+    startFlash(100);
     if (stuckTime >= stuckLimit) {
       gameOver();
     }
     return;
   }
 
-  stopWallFlash();
+  stopFlash();
   stuckTime = 0;
   snake.unshift(head);
 
@@ -224,7 +225,7 @@ function draw() {
 }
 
 function gameOver() {
-  stopWallFlash();
+  stopFlash();
   stopFoodSpawner();
   clearInterval(moveInterval);
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';

@@ -11,6 +11,7 @@ Use arrow keys or the on-screen buttons to steer the snake and collect food.
 - When only three items remain, new food spawns every few seconds until there are eight.
 - Each food is worth 10 points and grows the snake by one tile.
 - Game ends if the snake is stuck against a wall or itself for more than one second.
+- The snake blinks between green and red when it collides with itself, giving you a moment to steer away.
 
 To play locally, open `index.html` in a browser.
 
