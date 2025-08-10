@@ -13,6 +13,8 @@ canvas {
 #restart {
   display: none;
   margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 20px;
 }
 
 #controls {
@@ -26,8 +28,8 @@ canvas {
 }
 
 #controls button {
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
   margin: 5px;
 }
