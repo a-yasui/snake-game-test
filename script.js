@@ -1,5 +1,6 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+const restartBtn = document.getElementById('restart');
 
 const tileCount = 35;
 const tileSize = canvas.width / tileCount;
@@ -15,6 +16,7 @@ let moveInterval;
 let stuckTime = 0;
 
 function initGame() {
+  restartBtn.style.display = 'none';
   score = 0;
   document.getElementById('score').innerText = 'Score: ' + score;
   stuckTime = 0;
@@ -69,6 +71,8 @@ document.addEventListener('keydown', e => {
       break;
   }
 });
+
+restartBtn.addEventListener('click', initGame);
 
 function gameLoop() {
   direction = nextDirection;
@@ -126,6 +130,7 @@ function gameOver() {
   ctx.font = '48px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+  restartBtn.style.display = 'block';
 }
 
 initGame();
