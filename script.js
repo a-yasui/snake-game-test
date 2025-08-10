@@ -14,9 +14,44 @@ let food = { x: 0, y: 0 };
 let score = 0;
 let moveInterval;
 let stuckTime = 0;
+let snakeColor = 'lime';
+let wallFlashInterval = null;
+
+function updateScoreDisplay(points) {
+  const scoreEl = document.getElementById('score');
+  scoreEl.innerHTML =
+    '<span class="text-red-600 font-extrabold">+' + points + '!!</span>';
+  setTimeout(() => {
+    scoreEl.textContent = 'Score: ' + score;
+  }, 800);
+}
+
+function highlightButton(id) {
+  const btn = document.getElementById(id);
+  btn.classList.add('bg-blue-500', 'text-white');
+  setTimeout(() => btn.classList.remove('bg-blue-500', 'text-white'), 200);
+}
+
+function startWallFlash() {
+  if (wallFlashInterval) return;
+  snakeColor = 'red';
+  draw();
+  wallFlashInterval = setInterval(() => {
+    snakeColor = snakeColor === 'lime' ? 'red' : 'lime';
+    draw();
+  }, 50);
+}
+
+function stopWallFlash() {
+  if (!wallFlashInterval) return;
+  clearInterval(wallFlashInterval);
+  wallFlashInterval = null;
+  snakeColor = 'lime';
+}
 
 function initGame() {
   restartBtn.style.display = 'none';
+  stopWallFlash();
   score = 0;
   document.getElementById('score').innerText = 'Score: ' + score;
   stuckTime = 0;
@@ -56,23 +91,24 @@ function placeFood() {
 }
 
 function setNextDirection(x, y) {
-  if (direction.x === -x || direction.y === -y) return;
+  if (direction.x === -x || direction.y === -y) return false;
   nextDirection = { x, y };
+  return true;
 }
 
 document.addEventListener('keydown', e => {
   switch (e.key) {
     case 'ArrowUp':
-      setNextDirection(0, -1);
+      if (setNextDirection(0, -1)) highlightButton('up');
       break;
     case 'ArrowDown':
-      setNextDirection(0, 1);
+      if (setNextDirection(0, 1)) highlightButton('down');
       break;
     case 'ArrowLeft':
-      setNextDirection(-1, 0);
+      if (setNextDirection(-1, 0)) highlightButton('left');
       break;
     case 'ArrowRight':
-      setNextDirection(1, 0);
+      if (setNextDirection(1, 0)) highlightButton('right');
       break;
   }
 });
@@ -81,7 +117,7 @@ function addControl(id, x, y) {
   const btn = document.getElementById(id);
   const handler = e => {
     e.preventDefault();
-    setNextDirection(x, y);
+    if (setNextDirection(x, y)) highlightButton(id);
   };
   btn.addEventListener('touchstart', handler);
   btn.addEventListener('click', handler);
@@ -104,9 +140,17 @@ function gameLoop() {
     head.x < 0 ||
     head.y < 0 ||
     head.x >= tileCount ||
-    head.y >= tileCount ||
-    snake.some(seg => seg.x === head.x && seg.y === head.y)
+    head.y >= tileCount
   ) {
+    stuckTime += moveTime;
+    startWallFlash();
+    if (stuckTime >= stuckLimit) {
+      gameOver();
+    }
+    return;
+  }
+
+  if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
     stuckTime += moveTime;
     if (stuckTime >= stuckLimit) {
       gameOver();
@@ -114,12 +158,13 @@ function gameLoop() {
     return;
   }
 
+  stopWallFlash();
   stuckTime = 0;
   snake.unshift(head);
 
   if (head.x === food.x && head.y === food.y) {
     score += 10;
-    document.getElementById('score').innerText = 'Score: ' + score;
+    updateScoreDisplay(10);
     placeFood();
   } else {
     snake.pop();
@@ -135,13 +180,14 @@ function draw() {
   ctx.fillStyle = 'red';
   ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize, tileSize);
 
-  ctx.fillStyle = 'lime';
+  ctx.fillStyle = snakeColor;
   snake.forEach(seg => {
     ctx.fillRect(seg.x * tileSize, seg.y * tileSize, tileSize, tileSize);
   });
 }
 
 function gameOver() {
+  stopWallFlash();
   clearInterval(moveInterval);
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
