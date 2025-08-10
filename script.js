@@ -4,7 +4,12 @@ const restartBtn = document.getElementById('restart');
 
 const tileCount = 35;
 const tileSize = canvas.width / tileCount;
-const moveTime = 200; // ms per move
+const baseMoveTime = 200; // ms per move
+const level10MoveTime = 150; // ms per move when length >= 10
+const level20MoveTime = 100; // ms per move when length >= 20
+const speedUpMultiplier = 10;
+const speedUpDuration = 5000; // ms speed boost duration
+const speedItemSpawnTime = 10000; // ms between speed item spawns
 const stuckLimit = 1000; // ms before game over when stuck
 const initialFoodCount = 5;
 const foodSpawnThreshold = 3;
@@ -16,12 +21,17 @@ let snake = [];
 let direction = { x: 0, y: 0 };
 let nextDirection = { x: 0, y: 0 };
 let foods = [];
+let speedItem = null;
 let score = 0;
 let moveInterval;
+let currentMoveTime = baseMoveTime;
+let speedUpActive = false;
+let speedUpTimeout = null;
 let stuckTime = 0;
 let snakeColor = 'lime';
 let flashInterval = null;
 let foodSpawnInterval = null;
+let speedItemSpawnInterval = null;
 
 function updateScoreDisplay(points) {
   const scoreEl = document.getElementById('score');
@@ -74,10 +84,71 @@ function stopFoodSpawner() {
   foodSpawnInterval = null;
 }
 
+function placeSpeedItem() {
+  let item;
+  do {
+    item = {
+      x: Math.floor(Math.random() * tileCount),
+      y: Math.floor(Math.random() * tileCount)
+    };
+  } while (
+    snake.some(seg => seg.x === item.x && seg.y === item.y) ||
+    foods.some(f => f.x === item.x && f.y === item.y)
+  );
+  speedItem = item;
+}
+
+function startSpeedItemSpawner() {
+  if (speedItemSpawnInterval) return;
+  speedItemSpawnInterval = setInterval(() => {
+    if (!speedItem) {
+      placeSpeedItem();
+      draw();
+    }
+  }, speedItemSpawnTime);
+}
+
+function stopSpeedItemSpawner() {
+  if (!speedItemSpawnInterval) return;
+  clearInterval(speedItemSpawnInterval);
+  speedItemSpawnInterval = null;
+}
+
+function getBaseMoveTime() {
+  if (snake.length >= 20) return level20MoveTime;
+  if (snake.length >= 10) return level10MoveTime;
+  return baseMoveTime;
+}
+
+function updateSpeed() {
+  const base = getBaseMoveTime();
+  const newTime = speedUpActive ? base / speedUpMultiplier : base;
+  if (newTime !== currentMoveTime) {
+    currentMoveTime = newTime;
+    clearInterval(moveInterval);
+    moveInterval = setInterval(gameLoop, currentMoveTime);
+  }
+}
+
+function activateSpeedUp() {
+  speedUpActive = true;
+  updateSpeed();
+  if (speedUpTimeout) clearTimeout(speedUpTimeout);
+  speedUpTimeout = setTimeout(() => {
+    speedUpActive = false;
+    updateSpeed();
+  }, speedUpDuration);
+}
+
 function initGame() {
   restartBtn.style.display = 'none';
   stopFlash();
   stopFoodSpawner();
+  stopSpeedItemSpawner();
+  if (speedUpTimeout) {
+    clearTimeout(speedUpTimeout);
+    speedUpTimeout = null;
+  }
   score = 0;
   document.getElementById('score').innerText = 'Score: ' + score;
   stuckTime = 0;
@@ -101,11 +172,15 @@ function initGame() {
   }
 
   foods = [];
+  speedItem = null;
   for (let i = 0; i < initialFoodCount; i++) {
     placeFood();
   }
+  currentMoveTime = baseMoveTime;
+  speedUpActive = false;
   if (moveInterval) clearInterval(moveInterval);
-  moveInterval = setInterval(gameLoop, moveTime);
+  moveInterval = setInterval(gameLoop, currentMoveTime);
+  startSpeedItemSpawner();
 }
 
 function placeFood() {
@@ -174,7 +249,7 @@ function gameLoop() {
     head.x >= tileCount ||
     head.y >= tileCount
   ) {
-    stuckTime += moveTime;
+    stuckTime += currentMoveTime;
     startFlash();
     if (stuckTime >= stuckLimit) {
       gameOver();
@@ -183,7 +258,7 @@ function gameLoop() {
   }
 
   if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
-    stuckTime += moveTime;
+    stuckTime += currentMoveTime;
     startFlash();
     if (stuckTime >= stuckLimit) {
       gameOver();
@@ -194,6 +269,11 @@ function gameLoop() {
   stopFlash();
   stuckTime = 0;
   snake.unshift(head);
+
+  if (speedItem && speedItem.x === head.x && speedItem.y === head.y) {
+    speedItem = null;
+    activateSpeedUp();
+  }
 
   const foodIndex = foods.findIndex(f => f.x === head.x && f.y === head.y);
   if (foodIndex !== -1) {
@@ -207,6 +287,7 @@ function gameLoop() {
     snake.pop();
   }
 
+  updateSpeed();
   draw();
 }
 
@@ -218,6 +299,11 @@ function draw() {
   foods.forEach(f => {
     ctx.fillRect(f.x * tileSize, f.y * tileSize, tileSize, tileSize);
   });
+
+  if (speedItem) {
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(speedItem.x * tileSize, speedItem.y * tileSize, tileSize, tileSize);
+  }
 
   ctx.fillStyle = snakeColor;
   snake.forEach(seg => {
@@ -247,6 +333,12 @@ function draw() {
 function gameOver() {
   stopFlash();
   stopFoodSpawner();
+  stopSpeedItemSpawner();
+  if (speedUpTimeout) {
+    clearTimeout(speedUpTimeout);
+    speedUpTimeout = null;
+  }
+  speedUpActive = false;
   clearInterval(moveInterval);
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
